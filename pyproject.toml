@@ -1,0 +1,51 @@
+[project]
+name = "serl-plus-plus"
+authors = [{ name = "song.liu" }]
+version = "0.1"
+description = "SERL Plus Plus"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = "==3.10.19"
+dependencies = [
+    "torch==2.4.1",
+    "torchvision==0.19.1",
+    "gymnasium==1.2.3",
+    "mujoco==3.4.0",
+    "numpy==1.24.4",
+    "scipy==1.10.1",
+    "opencv-python==4.9.0.80",
+    "einops==0.8.1",
+    "imageio==2.9.0",
+    "imageio-ffmpeg==0.4.4",
+    "timm==1.0.22",
+    "wandb==0.23.1",
+    "tqdm==4.67.1",
+    "absl-py==0.13.0",
+    "ml-collections==0.1.1",
+    "diffusers==0.36.0",
+    "zarr==2.16.1",
+    "numcodecs==0.12.1",
+    "agentlace @ git+https://github.com/youliangtan/agentlace.git@cf2c337c5e3694cdbfc14831b239bd657bc4894d",
+    "easyhid==0.0.10",
+    "pynput==1.8.1",
+    "pyrealsense2",
+    "open3d",
+    "fpsample"
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["launcher*", "infra*", "demos*"]
+
+# PyTorch CUDA 12.4
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu124", marker = "sys_platform == 'linux' or sys_platform == 'win32'" }]
+torchvision = [{ index = "pytorch-cu124", marker = "sys_platform == 'linux' or sys_platform == 'win32'" }]
