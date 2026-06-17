@@ -33,7 +33,9 @@ from launcher.data.data_store import ReplayBufferDataStore
 from launcher import (
     make_trainer_config, 
     make_wandb_logger, 
+
     make_sac_pixel_agent,
+    make_sac_pointcloud_agent,
 )
 
 from demos.experiments.mappings import CONFIG_MAPPING
@@ -59,6 +61,7 @@ flags.DEFINE_boolean("use_amp", True, "Use mixed precision training (AMP) for fa
 
 flags.DEFINE_string("log_rlds_path", None, "Path to save RLDS logs.")
 flags.DEFINE_string("preload_rlds_path", None, "Path to preload RLDS data.")
+flags.DEFINE_string("agent_type", "sac", "Agent type.")
 
 
 def actor(
@@ -328,15 +331,26 @@ def main(_):
     )
     env = RecordEpisodeStatistics(env)
 
-    agent = make_sac_pixel_agent(
-        seed=FLAGS.seed,
-        sample_obs=env.observation_space.sample(),
-        sample_action=env.action_space.sample(),
-        image_keys=config.image_keys,
-        encoder_type=config.encoder_type,
-        discount=config.discount
-    )
-
+    if FLAGS.agent_type == "sac":
+        agent = make_sac_pixel_agent(
+            seed=FLAGS.seed,
+            sample_obs=env.observation_space.sample(),
+            sample_action=env.action_space.sample(),
+            image_keys=config.image_keys,
+            encoder_type=config.encoder_type,
+            discount=config.discount
+        )
+    elif FLAGS.agent_type == "sac3":
+        agent = make_sac_pointcloud_agent(
+            seed=FLAGS.seed,
+            sample_obs=env.observation_space.sample(),
+            sample_action=env.action_space.sample(),
+            encoder_type=config.encoder_type,
+            discount=config.discount
+        )
+    else:
+        raise NotImplementedError(f"Agent type {FLAGS.agent_type} not implemented.")
+        
     agent = agent.to(device)
 
     if FLAGS.checkpoint_path is not None and os.path.exists(FLAGS.checkpoint_path):
