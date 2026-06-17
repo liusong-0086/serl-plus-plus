@@ -53,6 +53,51 @@ def make_sac_pixel_agent(
     return agent
 
 
+def make_sac_pointcloud_agent(
+    seed: int,
+    sample_obs: dict,
+    sample_action: torch.Tensor,
+    encoder_type: str = "pointnet",
+    image_keys: tuple = ("image",),
+    reward_bias: float = 0.0,
+    target_entropy: float = None,
+    discount: float = 0.97,
+) -> SACAgent:
+    torch.manual_seed(seed)
+    
+    agent = SACAgent.create_pointcloud(
+        sample_obs=sample_obs,
+        sample_action=sample_action,
+        encoder_type=encoder_type,
+        use_proprio=True,
+        image_keys=image_keys,
+        policy_kwargs={
+            "tanh_squash_distribution": True,
+            "std_parameterization": "exp",
+            "std_min": 1e-5,
+            "std_max": 5,
+        },
+        critic_network_kwargs={
+            "activation": nn.Tanh(),
+            "use_layer_norm": True,
+            "hidden_dims": [256, 256],
+        },
+        policy_network_kwargs={
+            "activation": nn.Tanh(),
+            "use_layer_norm": True,
+            "hidden_dims": [256, 256],
+        },
+        temperature_init=1e-2,
+        discount=discount,
+        backup_entropy=False,
+        critic_ensemble_size=2,
+        critic_subsample_size=None,
+        reward_bias=reward_bias,
+        target_entropy=target_entropy,
+    )
+    return agent
+
+
 def make_trainer_config(port_number: int = 5588, broadcast_port: int = 5589) -> TrainerConfig:
     return TrainerConfig(
         port_number=port_number,

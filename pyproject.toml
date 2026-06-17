@@ -22,15 +22,19 @@ dependencies = [
     "tqdm==4.67.1",
     "absl-py==0.13.0",
     "ml-collections==0.1.1",
-    "diffusers==0.36.0",
     "zarr==2.16.1",
     "numcodecs==0.12.1",
     "agentlace @ git+https://github.com/youliangtan/agentlace.git@cf2c337c5e3694cdbfc14831b239bd657bc4894d",
+    "pyzmq",
+    "lz4",
+    "typing_extensions",
+    "pillow",
+    "huggingface-hub",
+    "safetensors",
     "easyhid==0.0.10",
-    "pynput==1.8.1",
-    "pyrealsense2",
     "open3d",
-    "fpsample"
+    "fpsample",
+    "pyrealsense2"
 ]
 
 [build-system]
