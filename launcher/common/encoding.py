@@ -44,8 +44,7 @@ class EncodingWrapper(nn.Module):
 
     def forward(
         self,
-        observations: Dict[str, torch.Tensor],
-        train: bool = False
+        observations: Dict[str, torch.Tensor]
     ) -> torch.Tensor:
         encoded = []
 
@@ -56,8 +55,10 @@ class EncodingWrapper(nn.Module):
 
             if self.enable_stacking and len(image.shape) == 5:
                 image = rearrange(image, "B T H W C -> (B T) H W C")
+            elif self.enable_stacking and len(image.shape) == 4 and "point" in image_key:
+                image = rearrange(image, "B T N C -> (B T) N C")
 
-            features = self.encoders[image_key](image, train=train)
+            features = self.encoders[image_key](image)
             encoded.append(features)
 
         if encoded:

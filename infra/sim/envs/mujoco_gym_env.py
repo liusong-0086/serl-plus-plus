@@ -38,12 +38,17 @@ class MujocoGymEnv(gym.Env):
         
         self._renderers = [MujocoRenderer(self._model, self._data, camera_name=item.camera_name, width=item.width, 
                                           height=item.height) for item in self._render_specs]
+        self._viewer = None
         if render_mode == "human":
             self._viewer = mujoco.viewer.launch_passive(self._model, self._data)
 
     def render(self):
         rendered_frames = []
         for i, render_spec in enumerate(self._render_specs):
+            # For open3d point cloud viewer (OpenGL backend conflict)
+            viewer = self._renderers[i].viewer
+            if viewer is not None and hasattr(viewer, "make_context_current"):
+                viewer.make_context_current()
             rendered_frames.append(self._renderers[i].render(render_mode=render_spec.mode))
         return rendered_frames
 

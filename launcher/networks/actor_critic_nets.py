@@ -4,8 +4,6 @@ import torch.nn as nn
 from torch.distributions import Normal
 
 from launcher.utils.torch_utils import orthogonal_init
-from launcher.networks.positional_embedding import SinusoidalPosEmb
-from launcher.utils.torch_utils import append_zero, append_dims
 
 
 class TanhNormal:
@@ -235,69 +233,3 @@ class GaussianPolicy(nn.Module):
             return TanhNormal(means, stds)
         else:
             return Normal(means, stds)
-
-
-class ConsistencyPolicy(nn.Module):
-    def __init__(
-        self,
-        network: nn.Module,
-        action_dim: int,
-        t_dim : int = 16,
-        sigma_max: float = 80.0,
-        sigma_min: float = 0.002,
-        rho: float = 7.0,
-        steps: int = 40,
-        sigma_data: float = 0.5
-    ):
-        super().__init__()
-        self.sigma_min = sigma_min
-        self.sigma_max = sigma_max
-        self.sigma_data = sigma_data
-        self.rho = rho
-        self.steps = steps
-        self.sigmas = self.get_karra_sigmas()
-        self.action_dim = action_dim
-
-        self.time_emb = nn.Sequential(
-            SinusoidalPosEmb(t_dim),
-            nn.Linear(t_dim, t_dim * 2),
-            nn.Mish(),
-            nn.Linear(t_dim * 2, t_dim)
-        )
-        self.network = network
-        self.final_layer = nn.Linear(network.out_dim, action_dim)
-
-    def get_karra_sigmas(self):
-        ramp = torch.linspace(0, 1, self.steps)
-        min_inv_rho = self.sigma_min ** (1 / self.rho)
-        max_inv_rho = self.sigma_max ** (1 / self.rho)
-        sigmas = (max_inv_rho + ramp * (min_inv_rho - max_inv_rho)) ** self.rho
-        return append_zero(sigmas)
-
-    def get_scalings_for_boundary_condition(self, sigma):
-        c_skip = self.sigma_data**2 / ((sigma - self.sigma_min) ** 2 + self.sigma_data**2)
-        c_out = ((sigma - self.sigma_min) * self.sigma_data / (sigma**2 + self.sigma_data**2) ** 0.5)
-        c_in = 1 / (sigma**2 + self.sigma_data**2) ** 0.5
-        return c_skip, c_out, c_in
-
-    def denoise(self, x_t, sigmas, obs_enc):
-        c_skip, c_out, c_in = [append_dims(x, x_t.ndim) 
-                               for x in self.get_scalings_for_boundary_condition(sigmas)]
-        rescaled_t = 1000 * 0.25 * torch.log(sigmas + 1e-44)
-        t = self.time_emb(rescaled_t)
-        outputs = self.network(torch.cat([c_in * x_t, t, obs_enc], dim=-1))
-        denoised = self.final_layer(outputs)
-        denoised = c_out * denoised + c_skip * x_t
-        return denoised
-    
-    def forward(self, obs_enc):
-        had_one_dim = obs_enc.ndim == 1
-        if had_one_dim:
-            obs_enc = obs_enc.unsqueeze(0)
-        x_t = torch.randn((obs_enc.shape[0], self.action_dim), device=obs_enc.device) * self.sigma_max
-        sigmas = self.sigmas[0].expand(obs_enc.shape[0]).to(obs_enc.device)
-        denoised = self.denoise(x_t, sigmas, obs_enc)
-        out = denoised.clip(-1, 1)
-        if had_one_dim:
-            out = out.squeeze(0)
-        return out

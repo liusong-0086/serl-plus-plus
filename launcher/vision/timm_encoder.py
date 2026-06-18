@@ -131,8 +131,7 @@ class PreTrainedResNetEncoder(nn.Module):
     
     def forward(
         self,
-        observations: torch.Tensor,
-        train: bool = True,
+        observations: torch.Tensor
     ) -> torch.Tensor:
         x = observations
 

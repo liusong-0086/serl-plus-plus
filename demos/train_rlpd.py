@@ -245,7 +245,6 @@ def learner(
         demo_iterator = demo_buffer.get_iterator(
         sample_args={
             "batch_size": single_buffer_batch_size,
-            "pack_obs_and_next_obs": True,
         },
         device=device)
     else:
@@ -255,7 +254,6 @@ def learner(
     replay_iterator = replay_buffer.get_iterator(
         sample_args={
             "batch_size": single_buffer_batch_size,
-            "pack_obs_and_next_obs": True,
         },
         device=device,
     )
@@ -345,6 +343,7 @@ def main(_):
             seed=FLAGS.seed,
             sample_obs=env.observation_space.sample(),
             sample_action=env.action_space.sample(),
+            image_keys=config.image_keys,
             encoder_type=config.encoder_type,
             discount=config.discount
         )

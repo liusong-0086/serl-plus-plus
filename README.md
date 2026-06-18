@@ -11,10 +11,6 @@
 - MuJoCo 2.3.7+
 - See `pyproject.toml` for full dependency list
 
-## Algorithm
-
-- **SAC**: Deep reinforcement learning based on Soft Actor-Critic
-
 ## Installation
 
 ```bash
@@ -29,21 +25,36 @@ source .venv/bin/activate
 ```
 
 ## Quick Start
-### 1. Peg insert sim
+### 1. Peg insert sim with RGB
 
 ![peg_insert_sim](./doc/peg_insert_sim.gif)
 
-#### 1. Train RLPD (Drq, SAC)
 ```bash
 # cd peg_insert_sim
 cd demos/experiments/peg_insert_sim
-# Record demo
-python ../../record_demo.py --exp_name peg_insert_sim
+# Download demo data
+mkdir demo_data && cd demo_data
+wget https://github.com/liusong-0086/serl-plus-plus/releases/download/demo_data/peg_insert_sim_20_demos.pkl
+cd ..
 # Start learner node
 bash run_learner.sh
 # Open new terminal, start actor node
 bash run_actor.sh
 ```
 
-## Reference
-Precise and Dexterous Robotic Manipulation via Human-in-the-Loop Reinforcement Learning [HIL-SERL](https://github.com/rail-berkeley/hil-serl)
+### 2. Peg insert sim with PointCloud
+
+![peg_insert_sim](./doc/peg_insert_pointcloud_sim.gif)
+
+```bash
+# cd peg_insert_sim
+cd demos/experiments/peg_insert_sim
+# Download demo data
+mkdir demo_data && cd demo_data
+wget https://github.com/liusong-0086/serl-plus-plus/releases/download/demo_data/peg_insert_pointcloud_sim_20_demos.pkl
+cd ..
+# Start learner node
+bash run_learner.sh
+# Open new terminal, start actor node
+bash run_actor.sh
+```

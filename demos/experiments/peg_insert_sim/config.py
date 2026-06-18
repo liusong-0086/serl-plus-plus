@@ -57,7 +57,7 @@ class TrainConfig(DefaultTrainingConfig):
             render_mode=render_mode,
         )
 
-        env = SpacemouseIntervention(env)
+        # env = SpacemouseIntervention(env)
         env = RelativeFrame(env)
         env = Quat2RotvecWrapper(env)   
         env = SERLObsWrapper(env, proprio_keys=self.proprio_keys)
